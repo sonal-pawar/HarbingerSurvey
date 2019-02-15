@@ -1,6 +1,9 @@
 // Call the dataTables jQuery plugin
 $(document).ready(function() {
-  $('#dataTable1').DataTable({
-        "bLengthChange": false
+  $('#dataTable').DataTable({
+        "pageLength": 5,
+        "bLengthChange": false,
+        "searching": false,
+        "ordering": false
     });
 });
