@@ -15,6 +15,7 @@ def question_list(request, survey_id):
     j = 0
     que_id1 = ()
     for i in survey_data:
+        print(i)
         que_id = survey_data[j]['question']
         que_id1 += (que_id,)
         j += 1
@@ -35,12 +36,12 @@ def employee(request):
     if 'username' in request.session:
         m = request.session['username']
         emp = Employee.objects.get(emp_username=m)
-        employee = Employee.objects.filter(id=emp.id)
+        employee_data = Employee.objects.filter(id=emp.id)
         print(emp.id)
         survey_emp_data = SurveyEmployee.objects.filter(employee=emp.id)
         completed_survey = list()
-        assign_survey = list()
-        incompleted_survey = list()
+        assigned_survey = list()
+        incomplete_survey = list()
 
         for survey in survey_emp_data:
             survey_feedback = SurveyFeedback.objects.filter(employee_id=emp.id, survey_id=survey.survey_id).count()
@@ -48,16 +49,16 @@ def employee(request):
                 if SurveyFeedback.objects.filter(survey_id=survey.survey_id, employee_id=emp.id, flag=True):
                     completed_survey.append(survey)
                 else:
-                    incompleted_survey.append(survey)
+                    incomplete_survey.append(survey)
             else:
-                assign_survey.append(survey)
+                assigned_survey.append(survey)
 
-        assigned_survey_count = len(assign_survey)
+        assigned_survey_count = len(assigned_survey)
         completed_survey_count = len(completed_survey)
-        context = {'session': m, 'survey_list': survey_emp_data, 'employee': employee,
-                   'completed_survey': completed_survey, 'assigned_survey': assign_survey,
+        context = {'session': m, 'survey_list': survey_emp_data, 'employee': employee_data,
+                   'completed_survey': completed_survey, 'assigned_survey': assigned_survey,
                    'completed_survey_count': completed_survey_count,
-                   'pending_survey_count': assigned_survey_count, 'incompleted_survey': incompleted_survey}
+                   'pending_survey_count': assigned_survey_count, 'incomplete_survey': incomplete_survey}
         print(survey_emp_data)
 
         return render(request, "survey/survey.html", context)
@@ -76,7 +77,8 @@ def login(request):
                 m = request.session['username'] = username
                 print("Session Name = "+m)
                 return redirect('employee')
-        except BaseException:
+        except BaseException as e:
+            print(e)
             return render(request, "survey/login.html")
     return render(request, "survey/login.html")
 
@@ -178,7 +180,6 @@ def survey_lists(request):
 def survey_questions(request, survey_id):
     survey_questions_list = SurveyQuestion.objects.filter(survey_id=survey_id)
     survey_employee_list = SurveyEmployee.objects.filter(survey_id=survey_id)
-    # survey_employee_list = SurveyEmployee.objects.filter(survey=Survey.objects.get(id=survey_id))
     return render(request, 'survey/survey_questions_list.html', {"survey_questions_list": survey_questions_list,
                                                                  "survey_employee_list": survey_employee_list})
 
