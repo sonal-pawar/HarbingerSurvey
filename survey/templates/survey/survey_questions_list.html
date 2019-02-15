@@ -1,0 +1,37 @@
+{% extends 'survey/base.html' %}
+
+{% block content %}
+
+
+    <h5>Questions List in Survey</h5>
+    <div class="card">
+        <ul class="list-group">
+            {% if survey_questions_list %}
+                {% for question in survey_questions_list %}
+                <li class="list-group-item">{{question.question}}</li>
+                {% endfor %}
+            {% else %}
+                <li class="list-group-item">Survey does't have questions</li>
+            {% endif %}
+        </ul>
+    </div>
+
+
+
+    <h5>List of Employee to Assigned Survey</h5>
+    <div class="card">
+        <ul class="list-group">
+            {% if survey_employee_list %}
+
+                {% for employee in survey_employee_list %}
+                    <li class="list-group-item">{{employee.employee}}</li>
+                {% endfor %}
+            {% else %}
+                <li class="list-group-item">Not to Assign anyone..</li>
+            {% endif %}
+        </ul>
+    </div>
+
+
+
+{% endblock %}
