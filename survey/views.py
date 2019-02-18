@@ -22,9 +22,12 @@ def question_list(request, survey_id):
         j += 1
 
     question_data = Question.objects.filter(id__in=que_id1)
+    print(question_data)
 
     ans_data = SurveyFeedback.objects.filter(survey_id=survey_id, employee_id=emp.id)
 
+    for i in question_data:
+        print(i.question_type)
     context = {'question_list': question_data, 'survey_id': survey_id, 'response': ans_data}
     return render(request, 'survey/question_list.html', context)
 
@@ -36,6 +39,7 @@ def employee(request):
         m = request.session['username']
         emp = Employee.objects.get(emp_username=m)
         employee_data = Employee.objects.filter(id=emp.id)
+        print(emp.id)
         survey_emp_data = SurveyEmployee.objects.filter(employee=emp.id)
 
         completed_survey = list()
@@ -58,6 +62,7 @@ def employee(request):
                    'completed_survey': completed_survey, 'assigned_survey': assigned_survey,
                    'completed_survey_count': completed_survey_count,
                    'pending_survey_count': assigned_survey_count, 'incomplete_survey': incomplete_survey}
+        print(survey_emp_data)
 
         return render(request, "survey/survey.html", context)
     return redirect('login')
@@ -65,21 +70,23 @@ def employee(request):
 
 def login(request):
     if request.method == "POST":
+        print("Entering into post method")
+
         username = request.POST.get("username")
         password = request.POST.get("password")
 
         try:
             if Employee.objects.get(emp_username=username, emp_password=password):
                 m = request.session['username'] = username
+                print("Session Name = "+m)
                 return redirect('employee')
         except BaseException as e:
-            print("Error: ", e)
+            print(e)
             return render(request, "survey/login.html")
     return render(request, "survey/login.html")
 
 
 def logout(request):
-    # deleting session variable
     try:
         del request.session['username']
     except KeyError:
@@ -90,24 +97,29 @@ def logout(request):
 def save(request, survey_id):
     m = request.session['username']
     emp = Employee.objects.get(emp_username=m)
+    print("current user", m)
+    print("user id :", request.user.id)
     for name in request.POST:
+        print("question id: ", name)
         if name != "csrfmiddlewaretoken" and name != 'btn_response':
-            is_record = SurveyFeedback.objects.filter(survey=Survey.objects.get(id=survey_id),
-                                                      employee=Employee.objects.get(id=emp.id),
-                                                      question=Question.objects.get(id=name))
-            if not is_record:
+            isRecord = SurveyFeedback.objects.filter(survey=Survey.objects.get(id=survey_id),
+                                                     employee=Employee.objects.get(id=emp.id),
+                                                     question=Question.objects.get(id=name))
+            if not isRecord:
                 if request.POST[name]:
                     if request.POST.getlist(name):
-                        survey_result_obj = SurveyFeedback()
-                        survey_result_obj.survey = Survey.objects.get(id=survey_id)
-                        survey_result_obj.employee = Employee.objects.get(id=emp.id)
-                        survey_result_obj.question = Question.objects.get(id=name)
-                        survey_result_obj.response = ', '.join(request.POST.getlist(name))
+                        surveyResultObj = SurveyFeedback()
+                        surveyResultObj.survey = Survey.objects.get(id=survey_id)
+                        print(surveyResultObj.survey)
+                        surveyResultObj.employee = Employee.objects.get(id=emp.id)
+                        print(surveyResultObj.employee)
+                        surveyResultObj.question = Question.objects.get(id=name)
+                        surveyResultObj.response = ', '.join(request.POST.getlist(name))
                         if request.POST["btn_response"] == "Finish":
-                            survey_result_obj.flag = True
+                            surveyResultObj.flag = True
                         else:
-                            survey_result_obj.flag = False
-                            survey_result_obj.save()
+                            surveyResultObj.flag = False
+                        surveyResultObj.save()
     return redirect("employee")
 
 
@@ -128,29 +140,36 @@ def send_email(request):
 
 def assign_survey(request, survey_id):
     user_list = Employee.objects.all()
+    print(len(user_list))
     return render(request, 'survey/survey_assign.html', {"user_list": user_list, "survey_id": survey_id})
 
 
 def save_assign_survey(request):
     if request.POST.getlist('emp_id'):
         for employee_id in request.POST.getlist('emp_id'):
-            survey_employee = SurveyEmployee.objects.filter(survey_id=request.POST['survey_id'],
-                                                            employee_id=employee_id)
-            if not survey_employee:
-                survey_employee_map_obj = SurveyEmployee()
-                survey_employee_map_obj.survey = get_object_or_404(Survey, pk=request.POST['survey_id'])
-                survey_employee_map_obj.employee = get_object_or_404(Employee, pk=employee_id)
-                survey_employee_map_obj.save()
-                user_obj = get_object_or_404(Employee, pk=employee_id)
-                to_email = user_obj.emp_username
+            print("survey_id = ", request.POST['survey_id'])
+            print("employee_id = ", employee_id)
+            surveyEmployee = SurveyEmployee.objects.filter(survey_id=request.POST['survey_id'],
+                                                           employee_id=employee_id)
+            if not surveyEmployee:
+                print(get_object_or_404(Employee, pk=employee_id))
+                surveyEmployeeMapObj = SurveyEmployee()
+                surveyEmployeeMapObj.survey = get_object_or_404(Survey, pk=request.POST['survey_id'])
+                surveyEmployeeMapObj.employee = get_object_or_404(Employee, pk=employee_id)
+                surveyEmployeeMapObj.save()
+                userObj = get_object_or_404(Employee, pk=employee_id)
+                print("User : ", userObj)
+                to_email = userObj.emp_username
+                print(to_email)
                 try:
+                    print("sed")
                     email_body = "http://127.0.0.1:8000/employee/"
                     email = EmailMessage(
                         'Survey Assign', email_body, to=[to_email]
                     )
                     email.send()
-                except Exception as e:
-                    print("Error : ", e)
+                except:
+                    print("Email error")
                 finally:
                     return redirect('surveyList')
     return redirect('surveyList')
