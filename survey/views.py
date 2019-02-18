@@ -101,6 +101,8 @@ def save(request, survey_id):
     print("user id :", request.user.id)
     for name in request.POST:
         print("question id: ", name)
+        all_answers = SurveyFeedback.objects.filter(survey=Survey.objects.get(id=survey_id),
+                                                 employee=Employee.objects.get(id=emp.id))
         if name != "csrfmiddlewaretoken" and name != 'btn_response':
             isRecord = SurveyFeedback.objects.filter(survey=Survey.objects.get(id=survey_id),
                                                      employee=Employee.objects.get(id=emp.id),
@@ -120,6 +122,10 @@ def save(request, survey_id):
                         else:
                             surveyResultObj.flag = False
                         surveyResultObj.save()
+        elif name == 'btn_response' and request.POST["btn_response"] == "Finish":
+            for record in all_answers:
+                record.flag = True
+                record.save()
     return redirect("employee")
 
 
