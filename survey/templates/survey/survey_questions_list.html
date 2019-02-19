@@ -2,34 +2,43 @@
 
 {% block content %}
 
-
-    <h5>Questions List in Survey</h5>
     <div class="card">
-        <ul class="list-group">
-            {% if survey_questions_list %}
-                {% for question in survey_questions_list %}
-                <li class="list-group-item">{{question.question}}</li>
-                {% endfor %}
-            {% else %}
-                <li class="list-group-item">Survey does't have questions</li>
-            {% endif %}
-        </ul>
+
+            <div class="card-header">
+                    <h5> Questions List in Survey </h5>
+            </div>
+
+            <div class="card-body">
+                <ul class="list-group">
+                    {% if survey_questions_list %}
+                        {% for question in survey_questions_list %}
+                        <li class="list-group-item">{{question.question}}</li>
+                        {% endfor %}
+                    {% else %}
+                        <li class="list-group-item">Survey doesn't have any questions</li>
+                    {% endif %}
+                </ul>
+            </div>
     </div>
 
 
 
-    <h5>List of Employee to Assigned Survey</h5>
     <div class="card">
-        <ul class="list-group">
-            {% if survey_employee_list %}
+        <div class="card-header">
+            <h5> List of Employee to Assigned Survey </h5>
+        </div>
+        <div class="card-body">
+            <ul class="list-group">
+                {% if survey_employee_list %}
 
-                {% for employee in survey_employee_list %}
-                    <li class="list-group-item">{{employee.employee}}</li>
-                {% endfor %}
-            {% else %}
-                <li class="list-group-item">Not to Assign anyone..</li>
-            {% endif %}
-        </ul>
+                    {% for employee in survey_employee_list %}
+                        <li class="list-group-item">{{employee.employee}}</li>
+                    {% endfor %}
+                {% else %}
+                    <li class="list-group-item">Survey not Assigned to anyone yet..</li>
+                {% endif %}
+            </ul>
+        </div>
     </div>
 
 

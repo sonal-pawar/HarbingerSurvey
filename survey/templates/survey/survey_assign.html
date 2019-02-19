@@ -1,24 +1,33 @@
 {% extends 'survey/base.html' %}
 
 {% block content %}
-    <h5>Assign Survey to Employees </h5>
-     <form class="form-horizontal" method="post" action="{% url 'saveAssignSurvey'  %}">
-          {% csrf_token %}
-        <input type="hidden" value="{{survey_id}}" name="survey_id">
-        <div class="card">
-            <ul class="list-group">
-                {% for user in user_list %}
-                <li class="list-group-item">
-                    <label><input type="checkbox" value="{{ user.id }}" name="emp_id">{{user.emp_name}}, Email: {{user.emp_username}}</label>
-                </li>
-                {% endfor %}
-            </ul>
+    <div class="card">
+        <div class="card-header">
+            <h5> Assign Survey to Employees </h5>
         </div>
-<br>
-         <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-              <button type="submit" class="btn btn-primary">Submit</button>
+        <div class="card-body">
+             <form class="form-horizontal" method="post" action="{% url 'saveAssignSurvey'  %}">
+              {% csrf_token %}
+            <input type="hidden" value="{{survey_id}}" name="survey_id">
+            <div class="card">
+                <ul class="list-group">
+                    {% for user in user_list %}
+                    <li class="list-group-item">
+                        <label><input type="checkbox" value="{{ user.id }}"  name="emp_id"> {{user.emp_name}}, Email: {{user.emp_username}}</label>
+                    </li>
+                    {% endfor %}
+                </ul>
             </div>
-         </div>
-     </form>
+            <br>
+             <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                  <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+             </div>
+
+         </form>
+        </div>
+
+    </div>
+
 {% endblock %}

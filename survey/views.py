@@ -4,6 +4,7 @@ from django.core.mail import EmailMessage
 from django.contrib.auth.decorators import login_required
 
 
+@login_required(login_url='admin:index')
 def index(request):
     return render(request, 'survey/home.html')
 
@@ -22,12 +23,7 @@ def question_list(request, survey_id):
         j += 1
 
     question_data = Question.objects.filter(id__in=que_id1)
-    print(question_data)
-
     ans_data = SurveyFeedback.objects.filter(survey_id=survey_id, employee_id=emp.id)
-
-    for i in question_data:
-        print(i.question_type)
     context = {'question_list': question_data, 'survey_id': survey_id, 'response': ans_data}
     return render(request, 'survey/question_list.html', context)
 
@@ -39,7 +35,6 @@ def employee(request):
         m = request.session['username']
         emp = Employee.objects.get(emp_username=m)
         employee_data = Employee.objects.filter(id=emp.id)
-        print(emp.id)
         survey_emp_data = SurveyEmployee.objects.filter(employee=emp.id)
 
         completed_survey = list()
@@ -62,16 +57,12 @@ def employee(request):
                    'completed_survey': completed_survey, 'assigned_survey': assigned_survey,
                    'completed_survey_count': completed_survey_count,
                    'pending_survey_count': assigned_survey_count, 'incomplete_survey': incomplete_survey}
-        print(survey_emp_data)
-
         return render(request, "survey/survey.html", context)
     return redirect('login')
 
 
 def login(request):
     if request.method == "POST":
-        print("Entering into post method")
-
         username = request.POST.get("username")
         password = request.POST.get("password")
 
@@ -97,10 +88,7 @@ def logout(request):
 def save(request, survey_id):
     m = request.session['username']
     emp = Employee.objects.get(emp_username=m)
-    print("current user", m)
-    print("user id :", request.user.id)
     for name in request.POST:
-        print("question id: ", name)
         all_answers = SurveyFeedback.objects.filter(survey=Survey.objects.get(id=survey_id),
                                                     employee=Employee.objects.get(id=emp.id))
 
@@ -113,9 +101,7 @@ def save(request, survey_id):
                     if request.POST.getlist(name):
                         survey_result_obj = SurveyFeedback()
                         survey_result_obj.survey = Survey.objects.get(id=survey_id)
-                        print(survey_result_obj.survey)
                         survey_result_obj.employee = Employee.objects.get(id=emp.id)
-                        print(survey_result_obj.employee)
                         survey_result_obj.question = Question.objects.get(id=name)
                         survey_result_obj.response = ', '.join(request.POST.getlist(name))
                         if request.POST["btn_response"] == "Finish":
@@ -133,12 +119,9 @@ def save(request, survey_id):
 def send_email(request):
     try:
         name = request.session['username']
-        print("Email has been send to :  ", name)
         email = EmailMessage('Survey Link', 'http://127.0.0.1:8000/employee/', to=[name])
         email.send()
-
         print("Email has been send to :  ", name)
-        print("---------------mail sent---------------")
     except Exception as e:
         print(e)
 
@@ -147,34 +130,30 @@ def send_email(request):
 
 def assign_survey(request, survey_id):
     user_list = Employee.objects.all()
-    print(len(user_list))
     return render(request, 'survey/survey_assign.html', {"user_list": user_list, "survey_id": survey_id})
 
 
 def save_assign_survey(request):
     if request.POST.getlist('emp_id'):
         for employee_id in request.POST.getlist('emp_id'):
-            print("survey_id = ", request.POST['survey_id'])
-            print("employee_id = ", employee_id)
             survey_employee = SurveyEmployee.objects.filter(survey_id=request.POST['survey_id'],
                                                             employee_id=employee_id)
             if not survey_employee:
-                print(get_object_or_404(Employee, pk=employee_id))
                 survey_employee_map_obj = SurveyEmployee()
                 survey_employee_map_obj.survey = get_object_or_404(Survey, pk=request.POST['survey_id'])
                 survey_employee_map_obj.employee = get_object_or_404(Employee, pk=employee_id)
                 survey_employee_map_obj.save()
                 user_obj = get_object_or_404(Employee, pk=employee_id)
-                print("User : ", user_obj)
                 to_email = user_obj.emp_username
-                print(to_email)
                 try:
-                    print("sed")
-                    email_body = "http://127.0.0.1:8000/employee/"
+                    print("send")
+                    email_body = "Hi, \n Your Survey Link\n" + request.build_absolute_uri('/')[:-1].strip("/")\
+                                 + "/employee"
                     email = EmailMessage(
                         'Survey Assign', email_body, to=[to_email]
                     )
                     email.send()
+                    print("Email has been send to ", to_email)
                 except Exception as e:
                     print("Email Error : ", e)
                 finally:

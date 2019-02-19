@@ -8,15 +8,52 @@
 {% endblock %}
 
 {% block jumbotron %}
-
       <div class="jumbotron">
       <div class="container">
         <h1> Survey Project </h1>
         <p> This is a survey landing page </p>
-        <p><a class="btn btn-primary btn-lg" href="{% url 'login'%}" role="button"> Please Login to take survey</a></p>
+        <p><a class="btn btn-primary btn-lg" href="{% url 'login'%}" role="button"> Please Login to take survey </a></p>
       </div>
-
     </div>
-
 {% endblock %}
 
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+              <img class="card-img-top" src="{% static 'img/admin.png' %}" alt="Card image cap">
+              <div class="card-body">
+                <h5 class="card-title">Admin Login</h5>
+                <p class="card-text"> Admin manages all events of Survey such as survey assignment, email, feedback, etc </p>
+                <a href="{% url 'admin:index' %}" class="btn btn-primary"> Admin </a>
+              </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+              <img class="card-img-top" src="{% static 'img/survey-icon.png' %}" alt="Card image cap">
+              <div class="card-body">
+                <h5 class="card-title"> Assign Survey </h5>
+                <p class="card-text"> Here, Admin assigns survey to multiple employees and sending survey link to everyone via Email.</p>
+                <a href="{% url 'surveyList' %}" class="btn btn-primary"> Assign Survey </a>
+              </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+              <img class="card-img-top" src="{% static 'img/user_login.jpg' %}" alt="Card image cap">
+              <div class="card-body">
+                <h5 class="card-title"> Employee Login </h5>
+                <p class="card-text"> Here, Employee takes survey and all surveys summery displayed on his dashboard </p>
+                <a href="{% url 'login'%}" class="btn btn-primary"> Employee Login </a>
+              </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
