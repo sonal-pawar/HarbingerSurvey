@@ -110,22 +110,23 @@ def save(request, survey_id):
                             survey_result_obj.flag = False
                             survey_result_obj.save()
         elif name == 'btn_response' and request.POST["btn_response"] == "Finish":
+
             for record in all_answers:
                 record.flag = True
                 record.save()
+            try:
+                email_body = "Hi, \n Your have completed the survey \n" + request.build_absolute_uri('/')[:-1].strip("/") \
+                             + "/employee"
+                print(email_body)
+                email = EmailMessage(
+                    'Survey Feedback ', email_body, to=[m]
+                )
+                email.send()
+                print("Email has been send to ", m)
+            except Exception as e:
+                print("Email Error : ", e)
+
     return redirect("employee")
-
-
-def send_email(request):
-    try:
-        name = request.session['username']
-        email = EmailMessage('Survey Link', 'http://127.0.0.1:8000/employee/', to=[name])
-        email.send()
-        print("Email has been send to :  ", name)
-    except Exception as e:
-        print(e)
-
-    return redirect('employee')
 
 
 def assign_survey(request, survey_id):
@@ -135,6 +136,7 @@ def assign_survey(request, survey_id):
 
 def save_assign_survey(request):
     if request.POST.getlist('emp_id'):
+        survey_id = request.POST['survey_id']
         for employee_id in request.POST.getlist('emp_id'):
             survey_employee = SurveyEmployee.objects.filter(survey_id=request.POST['survey_id'],
                                                             employee_id=employee_id)
@@ -146,9 +148,9 @@ def save_assign_survey(request):
                 user_obj = get_object_or_404(Employee, pk=employee_id)
                 to_email = user_obj.emp_username
                 try:
-                    print("send")
                     email_body = "Hi, \n Your Survey Link\n" + request.build_absolute_uri('/')[:-1].strip("/")\
                                  + "/employee"
+                    print(email_body)
                     email = EmailMessage(
                         'Survey Assign', email_body, to=[to_email]
                     )
