@@ -125,20 +125,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'survey/static')
+
 
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'sonalpawar2196@gmail.com'
 EMAIL_HOST_PASSWORD = 'LordKrishna21961006'
 EMAIL_PORT = 587
-
-
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_USE_TLS = True
-# EMAIL_HOST = 'sonal.pawar@harbingergroup.com' # double check the settings in your outlook mailbox to make sure the host name is correct
-#
-# EMAIL_PORT = 587  # double check the settings in your outlook mailbox and make sure the port number is correct
-#
-# EMAIL_HOST_USER = 'sonal.pawar'  # don't include the @blah.com part! I have made this stupid mistakes before
-#
-# EMAIL_HOST_PASSWORD = 'Unicorn2196'

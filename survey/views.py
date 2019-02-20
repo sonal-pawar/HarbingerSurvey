@@ -69,7 +69,6 @@ def login(request):
         try:
             if Employee.objects.get(emp_username=username, emp_password=password):
                 m = request.session['username'] = username
-                print("Session Name = "+m)
                 return redirect('employee')
         except BaseException as e:
             print(e)
@@ -117,7 +116,6 @@ def save(request, survey_id):
             try:
                 email_body = "Hi, \n Your have completed the survey \n" + request.build_absolute_uri('/')[:-1].strip("/") \
                              + "/employee"
-                print(email_body)
                 email = EmailMessage(
                     'Survey Feedback ', email_body, to=[m]
                 )
@@ -136,7 +134,6 @@ def assign_survey(request, survey_id):
 
 def save_assign_survey(request):
     if request.POST.getlist('emp_id'):
-        survey_id = request.POST['survey_id']
         for employee_id in request.POST.getlist('emp_id'):
             survey_employee = SurveyEmployee.objects.filter(survey_id=request.POST['survey_id'],
                                                             employee_id=employee_id)
@@ -150,7 +147,6 @@ def save_assign_survey(request):
                 try:
                     email_body = "Hi, \n Your Survey Link\n" + request.build_absolute_uri('/')[:-1].strip("/")\
                                  + "/employee"
-                    print(email_body)
                     email = EmailMessage(
                         'Survey Assign', email_body, to=[to_email]
                     )
