@@ -51,7 +51,7 @@ def employee(request):
             else:
                 assigned_survey.append(survey)
 
-        pending_survey_count = len(incomplete_survey)
+        pending_survey_count = len(assigned_survey)
         completed_survey_count = len(completed_survey)
         context = {'session': m, 'survey_list': survey_emp_data, 'employee': employee_data,
                    'completed_survey': completed_survey, 'assigned_survey': assigned_survey,
