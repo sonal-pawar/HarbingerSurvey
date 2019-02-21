@@ -51,12 +51,12 @@ def employee(request):
             else:
                 assigned_survey.append(survey)
 
-        assigned_survey_count = len(assigned_survey)
+        pending_survey_count = len(incomplete_survey)
         completed_survey_count = len(completed_survey)
         context = {'session': m, 'survey_list': survey_emp_data, 'employee': employee_data,
                    'completed_survey': completed_survey, 'assigned_survey': assigned_survey,
                    'completed_survey_count': completed_survey_count,
-                   'pending_survey_count': assigned_survey_count, 'incomplete_survey': incomplete_survey}
+                   'pending_survey_count': pending_survey_count, 'incomplete_survey': incomplete_survey}
         return render(request, "survey/survey.html", context)
     return redirect('login')
 
@@ -105,6 +105,8 @@ def save(request, survey_id):
                         survey_result_obj.response = ', '.join(request.POST.getlist(name))
                         if request.POST["btn_response"] == "Finish":
                             survey_result_obj.flag = True
+                            survey_result_obj.save()
+
                         else:
                             survey_result_obj.flag = False
                             survey_result_obj.save()
