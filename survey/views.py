@@ -2,6 +2,31 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Employee, SurveyQuestion, Survey, SurveyEmployee, Question, SurveyFeedback
 from django.core.mail import EmailMessage
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate
+from django import forms
+from django.http import HttpResponseRedirect
+from django.contrib.auth.models import User
+from .forms import UserRegistrationForm
+
+#
+# def register(request):
+#     if request.method == 'POST':
+#         form = UserRegistrationForm(request.POST)
+#         if form.is_valid():
+#             user_obj = form.cleaned_data
+#             username = user_obj['username']
+#             email = user_obj['email']
+#             password = user_obj['password']
+#             if not (User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists()):
+#                 User.objects.create_user(username, email, password)
+#                 user = authenticate(username=username, password=password)
+#                 login(request, user)
+#                 return HttpResponseRedirect('/')
+#             else:
+#                 raise forms.ValidationError('Looks like a username with that email or password already exists')
+#     else:
+#         form = UserRegistrationForm()
+#     return render(request, 'survey/register.html', {'form': form})
 
 
 @login_required(login_url='admin:index')
@@ -9,6 +34,7 @@ def index(request):
     return render(request, 'survey/home.html')
 
 
+@login_required(login_url='admin:index')
 def question_list(request, survey_id):
     # This view Displaying survey questions of particular survey
     m = request.session['username']
@@ -68,7 +94,8 @@ def login(request):
 
         try:
             if Employee.objects.get(emp_username=username, emp_password=password):
-                m = request.session['username'] = username
+                request.session['username'] = username
+
                 return redirect('employee')
         except BaseException as e:
             print(e)
@@ -116,7 +143,8 @@ def save(request, survey_id):
                 record.flag = True
                 record.save()
             try:
-                email_body = "Hi, \n Your have completed the survey \n" + request.build_absolute_uri('/')[:-1].strip("/") \
+                email_body = "Hi, \n Your have completed the survey \n" + \
+                             request.build_absolute_uri('/')[:-1].strip("/") \
                              + "/employee"
                 email = EmailMessage(
                     'Survey Feedback ', email_body, to=[m]

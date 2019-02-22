@@ -1,12 +1,14 @@
 from django.db import models
-from phonenumber_field.modelfields import PhoneNumberField
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 
 
 class Organization(models.Model):
     company_name = models.CharField(max_length=200)
     location = models.CharField(max_length=100)
     description = models.CharField(max_length=200)
+    admin = models.OneToOneField(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.company_name
@@ -14,10 +16,11 @@ class Organization(models.Model):
 
 class Employee(models.Model):
     emp_name = models.CharField(max_length=200)
-    emp_username = models.CharField(max_length=100)
+    emp_username = models.CharField(max_length=100, unique=True,
+                                    error_messages={'required': 'Please provide your email address.',
+                                                    'unique': 'An account with this email exist.'},)
     emp_password = models.CharField(max_length=100)
     emp_designation = models.CharField(max_length=100)
-    emp_contact = PhoneNumberField(null=False, blank=False, unique=True)
     emp_address = models.CharField(max_length=200)
     company = models.ForeignKey(Organization, on_delete=models.CASCADE)
 
@@ -41,7 +44,7 @@ class Survey(models.Model):
 
 
 def validate_list(value):
-    '''takes a text value and verifies that there is at least one comma '''
+    """takes a text value and verifies that there is at least one comma  """
     values = value.split(',')
     if len(values) < 2:
         raise ValidationError(
@@ -67,7 +70,8 @@ class Question(models.Model):
     question_type = models.CharField(max_length=200, choices=Question_types, default=TEXT)
 
     choices = models.TextField(blank=True, null=True,
-                               help_text='if the question type is "radio," "select," or "select multiple" provide a comma-separated list of options for this question .')
+                               help_text='if the question type is "radio," "select," or "select multiple"'
+                                         ' provide a comma-separated list of options for this question .')
 
     def get_choice(self):
             return self.choices.split(',')
