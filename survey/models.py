@@ -1,6 +1,5 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser
 
 
@@ -8,10 +7,16 @@ class Organization(models.Model):
     company_name = models.CharField(max_length=200)
     location = models.CharField(max_length=100)
     description = models.CharField(max_length=200)
-    admin = models.OneToOneField(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.company_name
+
+
+class User(AbstractUser):
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=True)
+    is_superuser = models.BooleanField(default=True)
 
 
 class Employee(models.Model):
@@ -89,6 +94,8 @@ class Question(models.Model):
 class SurveyEmployee(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
+    startDatetime = models.DateTimeField()
+    endDatetime = models.DateTimeField()
 
     def __str__(self):
         return self.survey.survey_name + "-" + self.employee.emp_name
@@ -97,6 +104,7 @@ class SurveyEmployee(models.Model):
 class SurveyQuestion(models.Model):
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    date = models.DateField()
 
     def __str__(self):
         return self.survey.survey_name+"-"+self.question.question

@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'phonenumber_field',
     'survey',
 ]
 
@@ -80,7 +79,7 @@ WSGI_APPLICATION = 'SurveySite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'surveydb',
+        'NAME': 'survey',
         'USER': 'postgres',
         'PASSWORD': 'admin',
         'HOST': 'localhost',
@@ -136,5 +135,5 @@ EMAIL_HOST_USER = 'sonalpawar2196@gmail.com'
 EMAIL_HOST_PASSWORD = 'LordKrishna21961006'
 EMAIL_PORT = 587
 
-
+AUTH_USER_MODEL = 'survey.User'
 

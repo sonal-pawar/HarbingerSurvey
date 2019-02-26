@@ -1,37 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Employee, SurveyQuestion, Survey, SurveyEmployee, Question, SurveyFeedback
+from .models import Employee, SurveyQuestion, Survey, SurveyEmployee, Question, SurveyFeedback, User
 from django.core.mail import EmailMessage
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate
-from django import forms
-from django.http import HttpResponseRedirect
-from django.contrib.auth.models import User
-from .forms import UserRegistrationForm
-
-#
-# def register(request):
-#     if request.method == 'POST':
-#         form = UserRegistrationForm(request.POST)
-#         if form.is_valid():
-#             user_obj = form.cleaned_data
-#             username = user_obj['username']
-#             email = user_obj['email']
-#             password = user_obj['password']
-#             if not (User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists()):
-#                 User.objects.create_user(username, email, password)
-#                 user = authenticate(username=username, password=password)
-#                 login(request, user)
-#                 return HttpResponseRedirect('/')
-#             else:
-#                 raise forms.ValidationError('Looks like a username with that email or password already exists')
-#     else:
-#         form = UserRegistrationForm()
-#     return render(request, 'survey/register.html', {'form': form})
 
 
 @login_required(login_url='admin:index')
 def index(request):
-    return render(request, 'survey/home.html')
+    if request.user.is_authenticated:
+        user_data = User.objects.filter(organization_id=request.user.organization_id)
+        context = {'user_data': user_data}
+        return render(request, 'survey/home.html', context)
 
 
 @login_required(login_url='admin:index')
@@ -55,6 +33,7 @@ def question_list(request, survey_id):
 
 
 @login_required(login_url='login')
+@login_required(login_url='admin:index')
 def employee(request):
     # survey details of logged in user displaying on this view
     if 'username' in request.session:
@@ -87,6 +66,7 @@ def employee(request):
     return redirect('login')
 
 
+@login_required(login_url='admin:index')
 def login(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -111,6 +91,7 @@ def logout(request):
     return redirect('login')
 
 
+@login_required(login_url='admin:index')
 def save(request, survey_id):
     m = request.session['username']
     emp = Employee.objects.get(emp_username=m)
@@ -157,11 +138,13 @@ def save(request, survey_id):
     return redirect("employee")
 
 
+@login_required(login_url='admin:index')
 def assign_survey(request, survey_id):
     user_list = Employee.objects.all()
     return render(request, 'survey/survey_assign.html', {"user_list": user_list, "survey_id": survey_id})
 
 
+@login_required(login_url='admin:index')
 def save_assign_survey(request):
     if request.POST.getlist('emp_id'):
         for employee_id in request.POST.getlist('emp_id'):
@@ -189,11 +172,13 @@ def save_assign_survey(request):
     return redirect('surveyList')
 
 
+@login_required(login_url='admin:index')
 def survey_lists(request):
     survey_list = Survey.objects.all()
     return render(request, 'survey/survey_employee.html', {"survey_list": survey_list})
 
 
+@login_required(login_url='admin:index')
 def survey_questions(request, survey_id):
     survey_questions_list = SurveyQuestion.objects.filter(survey_id=survey_id)
     survey_employee_list = SurveyEmployee.objects.filter(survey_id=survey_id)
