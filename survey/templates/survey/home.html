@@ -8,12 +8,13 @@
 {% endblock %}
 
 {% block jumbotron %}
-      <div class="jumbotron">
+      <div class="jumbotron" style="background:transparent !important">
       <div class="container">
           {% for user in user_data %}
         <h1> Survey Project </h1>
         <p> This is a survey landing page </p>
           <p> Welcome {{user.username}} , You are now Admin of {{ user.organization }} </p>
+
         <!--<p><a class="btn btn-primary btn-lg" href="{% url 'login'%}" role="button"> Please Login to take survey </a></p>-->
           {% endfor %}
       </div>
