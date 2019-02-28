@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Employee, SurveyQuestion, Survey, SurveyEmployee, Question, SurveyFeedback, User, Report
+from .models import Employee, SurveyQuestion, Survey, SurveyEmployee, Question, SurveyFeedback, User
 from django.core.mail import EmailMessage
 from django.contrib.auth.decorators import login_required
 
@@ -110,6 +110,7 @@ def save(request, survey_id):
                         survey_result_obj.survey = Survey.objects.get(id=survey_id)
                         survey_result_obj.employee = Employee.objects.get(id=emp.id)
                         survey_result_obj.question = Question.objects.get(id=name)
+                        survey_result_obj.organization = request.user.organization
                         survey_result_obj.response = ', '.join(request.POST.getlist(name))
                         if request.POST["btn_response"] == "Finish":
                             survey_result_obj.flag = True
@@ -154,6 +155,7 @@ def save_assign_survey(request):
                 survey_employee_map_obj = SurveyEmployee()
                 survey_employee_map_obj.survey = get_object_or_404(Survey, pk=request.POST['survey_id'])
                 survey_employee_map_obj.employee = get_object_or_404(Employee, pk=employee_id)
+                survey_employee_map_obj.organization = request.user.organization
                 survey_employee_map_obj.save()
                 user_obj = get_object_or_404(Employee, pk=employee_id)
                 to_email = user_obj.emp_username
@@ -180,8 +182,10 @@ def survey_lists(request):
 
 @login_required(login_url='admin:index')
 def survey_questions(request, survey_id):
-    survey_questions_list = SurveyQuestion.objects.filter(survey_id=survey_id)
-    survey_employee_list = SurveyEmployee.objects.filter(survey_id=survey_id)
+    survey_questions_list = SurveyQuestion.objects.filter(survey_id=survey_id,
+                                                          organization=request.user.organization)
+    survey_employee_list = SurveyEmployee.objects.filter(survey_id=survey_id,
+                                                         organization=request.user.organization)
     return render(request, 'survey/survey_questions_list.html', {"survey_questions_list": survey_questions_list,
                                                                  "survey_employee_list": survey_employee_list})
 

@@ -1,7 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser
-from django.contrib.auth import settings
 
 
 class Organization(models.Model):
@@ -39,6 +38,7 @@ class Employee(models.Model):
 class Survey(models.Model):
     survey_name = models.CharField(max_length=200)
     description = models.CharField(max_length=200)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     date = models.DateField()
 
     def __str__(self):
@@ -71,12 +71,14 @@ class Question(models.Model):
         (INTEGER, 'integer'),
     )
     question = models.TextField()
-    is_required = models.BooleanField()
+    question = models.TextField()
+    is_required = models.BooleanField(default=False)
     question_type = models.CharField(max_length=200, choices=Question_types, default=TEXT)
 
     choices = models.TextField(blank=True, null=True,
                                help_text='if the question type is "radio," "select," or "select multiple"'
                                          ' provide a comma-separated list of options for this question .')
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
 
     def get_choice(self):
             return self.choices.split(',')
@@ -94,6 +96,7 @@ class Question(models.Model):
 class SurveyEmployee(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     startDatetime = models.DateTimeField()
     endDatetime = models.DateTimeField()
 
@@ -103,6 +106,7 @@ class SurveyEmployee(models.Model):
 
 class SurveyQuestion(models.Model):
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -113,13 +117,10 @@ class SurveyFeedback(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     response = models.TextField(blank=True, null=True)
     flag = models.BooleanField()
     created_date = models.DateField(auto_now_add=True)
     updated_date = models.DateField(auto_now_add=True)
 
 
-class Report(models.Model):
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    SurveyFeedback = models.ForeignKey(SurveyFeedback, on_delete=models.CASCADE)
-    Survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
