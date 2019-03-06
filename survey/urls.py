@@ -1,7 +1,6 @@
 from . import views
 from django.urls import path
 from django.conf.urls import url
-from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -11,8 +10,11 @@ urlpatterns = [
     path('save/<int:survey_id>', views.save, name='save'),
     path('logout/', views.logout, name='logout'),
     url(r'^(?P<survey_id>[0-9]+)/assignSurvey/$', views.assign_survey, name='assignSurvey'),
+    url(r'^(?P<survey_id>[0-9]+)/assignQuestion/$', views.assign_question, name='assignQuestion'),
     path('surveyList', views.survey_lists, name='surveyList'),
     path('saveAssignSurvey/', views.save_assign_survey, name='saveAssignSurvey'),
+    path('saveAssignQuestion/', views.save_assign_question, name='saveAssignQuestion'),
     url(r'^(?P<survey_id>[0-9]+)/surveyQuest/$', views.survey_questions, name='surveyQuest'),
+    path('report/', views.report, name='report')
 
 ]

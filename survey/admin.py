@@ -1,9 +1,20 @@
 from django.contrib import admin
 from .models import Employee, Organization,Survey,Question,SurveyEmployee, SurveyQuestion, SurveyFeedback, User
 from django.contrib.auth.admin import UserAdmin
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin
 
 
-class MyUserAdmin(UserAdmin):
+class UserResource(resources.ModelResource):
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'email', 'organization')
+        export_order = ('username', 'first_name', 'email', 'organization')
+        skip_unchanged = True
+        report_skipped = False
+
+
+class MyUserAdmin(UserAdmin, ImportExportModelAdmin):
     model = User
     list_display = ['username', 'first_name', 'email', 'organization']
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
@@ -17,6 +28,7 @@ class MyUserAdmin(UserAdmin):
         ('Personal info', {'fields': ('first_name', 'last_name', 'email', 'organization', 'groups')}),
     )
     ordering = ('username',)
+    resource_class = UserResource
 
 
 class OrganizationDetails(admin.ModelAdmin):
@@ -165,15 +177,12 @@ class AnswerDetails(admin.ModelAdmin):
     list_display = ('id', 'employee', 'survey', 'question', 'organization', 'response', 'flag', 'created_date', 'updated_date')
     list_filter = ('employee', 'survey', 'created_date', 'updated_date')
 
-    # This function will be disable add permission for answer model
     def has_add_permission(self, request, obj=None):
         return False
 
-    # This function will be disable change permission for answer model
     def has_change_permission(self, request, obj=None):
         return False
 
-    # This function will be disable delete permission for answer model
     def has_delete_permission(self, request, obj=None):
         return False
 

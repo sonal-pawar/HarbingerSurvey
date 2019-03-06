@@ -9,8 +9,17 @@
                 <li class="list-group-item">
                     <a href="{% url 'surveyQuest' survey.id %}"> {{ survey.survey_name }}</a>
                     <a href="{% url 'assignSurvey' survey.id %}"><span class="fa fa-share text-right" style="float:right"></span></a>
+                    <a href="{% url 'assignQuestion' survey.id %}"><span class="fa fa-question-circle" style="display:inline-block"></span></a>
+
                 </li>
             {% endfor %}
         </ul>
+    </div>
+        <br>
+<hr>
+    <div class="container">
+        <p> Help </p>
+        <p><span class="fa fa-share text-right"></span> : assign survey to employees </p>
+        <p><span class="fa fa-question-circle"></span> : assign questions to employees </p>
     </div>
 {% endblock %}

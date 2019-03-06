@@ -71,10 +71,8 @@ class Question(models.Model):
         (INTEGER, 'integer'),
     )
     question = models.TextField()
-    question = models.TextField()
     is_required = models.BooleanField(default=False)
     question_type = models.CharField(max_length=200, choices=Question_types, default=TEXT)
-
     choices = models.TextField(blank=True, null=True,
                                help_text='if the question type is "radio," "select," or "select multiple"'
                                          ' provide a comma-separated list of options for this question .')
@@ -97,8 +95,8 @@ class SurveyEmployee(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    startDatetime = models.DateTimeField()
-    endDatetime = models.DateTimeField()
+    startDatetime = models.DateField(blank=True, null=True)
+    endDatetime = models.DateField(blank=True, null=True)
 
     def __str__(self):
         return self.survey.survey_name + "-" + self.employee.emp_name

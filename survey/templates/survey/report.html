@@ -1,0 +1,50 @@
+{% extends 'survey/base.html' %}
+
+{% block content %}
+    <div class="card">
+            <div class="card-header">
+                <h5> Organization report </h5>
+            </div>
+        <div class="card-body">
+             <form class="form-horizontal" method="post">
+              {% csrf_token %}
+                    <div class="card">
+                        <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Employee Name</th>
+                                        <th>Assigned Surveys</th>
+                                        <th>Survey Start Date</th>
+                                        <th>Survey End Date </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                   {% for sur in survey %}
+                                    <tr>
+
+                                        <td>
+                                                {{ sur.employee.emp_name }}
+                                        </td>
+
+                                        <td>  {{ sur.survey.survey_name }}
+                                                 </td>
+
+                                         <td>  {{ sur.startDatetime }}
+                                                 </td>
+
+                                        <td>  {{ sur.endDatetime }}
+                                                 </td>
+                                    </tr>
+                                   {% endfor %}
+
+                                </tbody>
+                        </table>
+                    <div>
+            <br>
+
+            </div>
+         </form>
+        </div>
+    </div>
+{% endblock %}

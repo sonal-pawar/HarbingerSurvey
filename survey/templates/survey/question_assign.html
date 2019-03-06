@@ -1,0 +1,34 @@
+{% extends 'survey/base.html' %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <h5> Assign Questions to survey </h5>
+        </div>
+        <div class="card-body">
+             <form class="form-horizontal" method="post" action="{% url 'saveAssignQuestion'  %}">
+              {% csrf_token %}
+            <input type="hidden" value="{{survey_id}}" name="survey_id">
+            <div class="card">
+                <ul class="list-group">
+                    {% for question in question_list %}
+                    <li class="list-group-item">
+
+                        <label><input type="checkbox" value="{{ question.id }}"  name="question_id"> {{question.question}}, Type: {{question.question_type}}</label>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <br>
+             <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                  <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+             </div>
+
+         </form>
+        </div>
+
+    </div>
+
+{% endblock %}

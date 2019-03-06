@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Employee, SurveyQuestion, Survey, SurveyEmployee, Question, SurveyFeedback, User
 from django.core.mail import EmailMessage
 from django.contrib.auth.decorators import login_required
+from django.utils.dateparse import parse_date
 
 
 @login_required(login_url='admin:index')
@@ -12,7 +13,6 @@ def index(request):
         return render(request, 'survey/home.html', context)
 
 
-@login_required(login_url='admin:index')
 def question_list(request, survey_id):
     # This view Displaying survey questions of particular survey
     m = request.session['username']
@@ -33,7 +33,6 @@ def question_list(request, survey_id):
 
 
 @login_required(login_url='login')
-@login_required(login_url='admin:index')
 def employee(request):
     # survey details of logged in user displaying on this view
     if 'username' in request.session:
@@ -66,7 +65,6 @@ def employee(request):
     return redirect('login')
 
 
-@login_required(login_url='admin:index')
 def login(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -91,7 +89,6 @@ def logout(request):
     return redirect('login')
 
 
-@login_required(login_url='admin:index')
 def save(request, survey_id):
     m = request.session['username']
     emp = Employee.objects.get(emp_username=m)
@@ -139,15 +136,20 @@ def save(request, survey_id):
     return redirect("employee")
 
 
-@login_required(login_url='admin:index')
 def assign_survey(request, survey_id):
-    user_list = Employee.objects.all()
+    user_list = Employee.objects.filter(company=request.user.organization)
     return render(request, 'survey/survey_assign.html', {"user_list": user_list, "survey_id": survey_id})
 
 
-@login_required(login_url='admin:index')
+def assign_question(request, survey_id):
+    questions = Question.objects.filter(organization=request.user.organization)
+    return render(request, 'survey/question_assign.html', {"question_list": questions, "survey_id": survey_id})
+
+
 def save_assign_survey(request):
     if request.POST.getlist('emp_id'):
+        for name in request.POST:
+            print(name)
         for employee_id in request.POST.getlist('emp_id'):
             survey_employee = SurveyEmployee.objects.filter(survey_id=request.POST['survey_id'],
                                                             employee_id=employee_id)
@@ -156,6 +158,11 @@ def save_assign_survey(request):
                 survey_employee_map_obj.survey = get_object_or_404(Survey, pk=request.POST['survey_id'])
                 survey_employee_map_obj.employee = get_object_or_404(Employee, pk=employee_id)
                 survey_employee_map_obj.organization = request.user.organization
+                survey_employee_map_obj.startDatetime = parse_date(request.POST.getlist('start-date')[0])
+                print("date : ", survey_employee_map_obj.startDatetime)
+
+                survey_employee_map_obj.endDatetime = parse_date(request.POST.getlist('end-date')[0])
+
                 survey_employee_map_obj.save()
                 user_obj = get_object_or_404(Employee, pk=employee_id)
                 to_email = user_obj.emp_username
@@ -174,13 +181,25 @@ def save_assign_survey(request):
     return redirect('surveyList')
 
 
-@login_required(login_url='admin:index')
+def save_assign_question(request):
+    if request.POST.getlist('question_id'):
+        for question_id in request.POST.getlist('question_id'):
+            survey_question = SurveyQuestion.objects.filter(survey_id=request.POST['survey_id'],
+                                                            question_id=question_id)
+            if not survey_question:
+                survey_question_map_obj = SurveyQuestion()
+                survey_question_map_obj.survey = get_object_or_404(Survey, pk=request.POST['survey_id'])
+                survey_question_map_obj.organization = request.user.organization
+                survey_question_map_obj.question = get_object_or_404(Question, pk=question_id)
+                survey_question_map_obj.save()
+    return redirect('surveyList')
+
+
 def survey_lists(request):
-    survey_list = Survey.objects.all()
+    survey_list = Survey.objects.filter(organization=request.user.organization)
     return render(request, 'survey/survey_employee.html', {"survey_list": survey_list})
 
 
-@login_required(login_url='admin:index')
 def survey_questions(request, survey_id):
     survey_questions_list = SurveyQuestion.objects.filter(survey_id=survey_id,
                                                           organization=request.user.organization)
@@ -188,4 +207,17 @@ def survey_questions(request, survey_id):
                                                          organization=request.user.organization)
     return render(request, 'survey/survey_questions_list.html', {"survey_questions_list": survey_questions_list,
                                                                  "survey_employee_list": survey_employee_list})
+
+
+def report(request):
+    emp_data = Employee.objects.filter(company=request.user.organization)
+    for emp in emp_data:
+
+        result = SurveyFeedback.objects.filter(employee_id=emp.id).values('employee_id').distinct()
+        print(result)
+        for i in result:
+            print(i['employee_id'])
+            survey_emp_data = SurveyEmployee.objects.filter(employee_id=i['employee_id'])
+            context = {'employee': emp_data, 'survey': survey_emp_data, 'result': result}
+            return render(request, 'survey/report.html', context)
 
