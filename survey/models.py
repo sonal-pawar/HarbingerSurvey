@@ -26,7 +26,7 @@ class Employee(models.Model):
     emp_password = models.CharField(max_length=100)
     emp_designation = models.CharField(max_length=100)
     emp_address = models.CharField(max_length=200)
-    company = models.CharField(max_length=200)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return self.emp_name

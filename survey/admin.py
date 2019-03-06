@@ -7,14 +7,35 @@ from import_export.admin import ImportExportModelAdmin
 
 class UserResource(resources.ModelResource):
     class Meta:
-        model = User
-        fields = ('username', 'first_name', 'email', 'organization')
-        export_order = ('username', 'first_name', 'email', 'organization')
+        model = Employee
+        fields = ('emp_name', 'emp_username', 'emp_designation', 'emp_address', 'organization')
+        export_order = fields
         skip_unchanged = True
-        report_skipped = False
+        report_skipped = True
+        exclude = ['id']
+        import_id_fields = ['organization_id']
+
+        def before_import(self, dataset, using_transactions, dry_run, **kwargs):
+            organization = kwargs['user'].organization_id
+            if 'organization_id' not in dataset.headers:
+                dataset.headers.append('organization_id')
+                contract_field = [int(organization)] * dataset.height
+                dataset.append_col(contract_field, header='organization_id')
+
+        def get_instance(self, instance_loader, row):
+            try:
+                params = {}
+                for key in instance_loader.resource.get_import_id_fields():
+                    field = instance_loader.resource.fields[key]
+                    params[field.attribute] = field.clean(row)
+                return self.get_queryset().get(**params)
+            except Exception as e:
+                print(e)
+                return None
 
 
-class MyUserAdmin(UserAdmin, ImportExportModelAdmin):
+
+class MyUserAdmin(UserAdmin):
     model = User
     list_display = ['username', 'first_name', 'email', 'organization']
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
@@ -28,7 +49,6 @@ class MyUserAdmin(UserAdmin, ImportExportModelAdmin):
         ('Personal info', {'fields': ('first_name', 'last_name', 'email', 'organization', 'groups')}),
     )
     ordering = ('username',)
-    resource_class = UserResource
 
 
 class OrganizationDetails(admin.ModelAdmin):
@@ -37,8 +57,8 @@ class OrganizationDetails(admin.ModelAdmin):
     list_filter = ('location',)
 
 
-class EmployeeDetails(admin.ModelAdmin):
-    list_display = ('id', 'emp_name', 'emp_username', 'emp_designation', 'emp_address', 'company')
+class EmployeeDetails(ImportExportModelAdmin,admin.ModelAdmin):
+    list_display = ('id', 'emp_name', 'emp_username', 'emp_designation', 'emp_address', 'organization')
     # list_filter = ('company',)
     fieldsets = (
         ('Personal info', {'fields': ('emp_name', 'emp_username', 'emp_password', 'emp_designation', 'emp_address')}),
@@ -48,17 +68,18 @@ class EmployeeDetails(admin.ModelAdmin):
         ('Personal info', {'fields': ('emp_name', 'emp_username', 'emp_password', 'emp_designation', 'emp_address')}),
     )
     ordering = ('emp_username',)
+    resource_class = UserResource
 
     def get_queryset(self, request):
         qs = super(EmployeeDetails, self).get_queryset(request)
         if request.user.is_superuser:
             return qs
         elif request.user.is_authenticated:
-            return qs.filter(company=request.user.organization)
+            return qs.filter(organization_id=request.user.organization)
         return qs
 
     def save_model(self, request, obj, form, change):
-        obj.company = request.user.organization
+        obj.organization = request.user.organization
         obj.save()
 
 
@@ -147,7 +168,7 @@ class SurveyEmployeeDetails(admin.ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "employee":
-            kwargs["queryset"] = Employee.objects.filter(company=request.user.organization)
+            kwargs["queryset"] = Employee.objects.filter(organization=request.user.organization)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     fieldsets = (

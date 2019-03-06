@@ -137,7 +137,7 @@ def save(request, survey_id):
 
 
 def assign_survey(request, survey_id):
-    user_list = Employee.objects.filter(company=request.user.organization)
+    user_list = Employee.objects.filter(organization_id=request.user.organization)
     return render(request, 'survey/survey_assign.html', {"user_list": user_list, "survey_id": survey_id})
 
 
@@ -210,7 +210,7 @@ def survey_questions(request, survey_id):
 
 
 def report(request):
-    emp_data = Employee.objects.filter(company=request.user.organization)
+    emp_data = Employee.objects.filter(organization_id=request.user.organization)
     for emp in emp_data:
 
         result = SurveyFeedback.objects.filter(employee_id=emp.id).values('employee_id').distinct()
