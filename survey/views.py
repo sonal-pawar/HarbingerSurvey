@@ -3,6 +3,7 @@ from .models import Employee, SurveyQuestion, Survey, SurveyEmployee, Question, 
 from django.core.mail import EmailMessage
 from django.contrib.auth.decorators import login_required
 from django.utils.dateparse import parse_date
+from django.utils.timezone import now
 
 
 @login_required(login_url='admin:index')
@@ -39,8 +40,14 @@ def employee(request):
         m = request.session['username']
         emp = Employee.objects.get(emp_username=m)
         employee_data = Employee.objects.filter(id=emp.id)
-        survey_emp_data = SurveyEmployee.objects.filter(employee=emp.id)
-
+        survey_emp_data = SurveyEmployee.objects.filter(employee=emp.id, startDatetime__lte=now(),
+                                                        endDatetime__gte=now())
+        upcoming_surveys = SurveyEmployee.objects.filter(employee=emp.id, startDatetime__gt=now(),
+                                                         endDatetime__gte=now())
+        expired_surveys = SurveyEmployee.objects.filter(employee=emp.id, startDatetime__lt=now(),
+                                                        endDatetime__lte=now())
+        current_surveys = SurveyEmployee.objects.filter(employee=emp.id, startDatetime__lte=now(),
+                                                        endDatetime__gte=now())
         completed_survey = list()
         assigned_survey = list()
         incomplete_survey = list()
@@ -59,6 +66,8 @@ def employee(request):
         completed_survey_count = len(completed_survey)
         context = {'session': m, 'survey_list': survey_emp_data, 'employee': employee_data,
                    'completed_survey': completed_survey, 'assigned_survey': assigned_survey,
+                   'upcoming_surveys': upcoming_surveys, 'expired_surveys': expired_surveys,
+                   'current_surveys': current_surveys,
                    'completed_survey_count': completed_survey_count,
                    'pending_survey_count': pending_survey_count, 'incomplete_survey': incomplete_survey}
         return render(request, "survey/survey.html", context)
@@ -128,7 +137,7 @@ def save(request, survey_id):
                 email = EmailMessage(
                     'Survey Feedback ', email_body, to=[m]
                 )
-                email.send()
+                # email.send()
                 print("Email has been send to ", m)
             except Exception as e:
                 print("Email Error : ", e)
@@ -158,10 +167,10 @@ def save_assign_survey(request):
                 survey_employee_map_obj.survey = get_object_or_404(Survey, pk=request.POST['survey_id'])
                 survey_employee_map_obj.employee = get_object_or_404(Employee, pk=employee_id)
                 survey_employee_map_obj.organization = request.user.organization
-                survey_employee_map_obj.startDatetime = parse_date(request.POST.getlist('start-date')[0])
+                survey_employee_map_obj.startDatetime = parse_date(request.POST.getlist('start-date')[1])
                 print("date : ", survey_employee_map_obj.startDatetime)
 
-                survey_employee_map_obj.endDatetime = parse_date(request.POST.getlist('end-date')[0])
+                survey_employee_map_obj.endDatetime = parse_date(request.POST.getlist('end-date')[1])
 
                 survey_employee_map_obj.save()
                 user_obj = get_object_or_404(Employee, pk=employee_id)
@@ -172,7 +181,7 @@ def save_assign_survey(request):
                     email = EmailMessage(
                         'Survey Assign', email_body, to=[to_email]
                     )
-                    email.send()
+                    # email.send()
                     print("Email has been send to ", to_email)
                 except Exception as e:
                     print("Email Error : ", e)
@@ -220,4 +229,6 @@ def report(request):
             survey_emp_data = SurveyEmployee.objects.filter(employee_id=i['employee_id'])
             context = {'employee': emp_data, 'survey': survey_emp_data, 'result': result}
             return render(request, 'survey/report.html', context)
+        return render(request, 'survey/NotAvailable.html')
+    return render(request, 'survey/NotAvailable.html')
 

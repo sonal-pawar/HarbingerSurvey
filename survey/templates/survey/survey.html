@@ -191,8 +191,99 @@
             </div>
 
 
-          <div class="row">
 
+
+           <!-- DataTales Example -->
+          <div class="card shadow mb-4">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary"> Upcoming Surveys </h6>
+              <p class="m-0  text-primary"> The link will be available soon....... </p>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th>Survey</th>
+                      <th>start date</th>
+                      <th>end date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for surv in upcoming_surveys %}
+                    <tr>
+                      <td>{{ surv.survey.survey_name }}</td>
+                      <td>{{ surv.startDatetime }}</td>
+                      <td>{{ surv.endDatetime }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+
+           <div class="card shadow mb-4">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary"> Expired Surveys</h6>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th>Survey</th>
+                      <th>start date</th>
+                      <th>end date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for surv in expired_surveys %}
+                    <tr>
+                      <td>{{ surv.survey.survey_name }}</td>
+                      <td>{{ surv.startDatetime }}</td>
+                      <td>{{ surv.endDatetime }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+
+
+          <div class="card shadow mb-4">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary"> Current Surveys</h6>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th>Survey</th>
+                      <th>start date</th>
+                      <th>end date</th>
+                      <th> Link </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for surv in current_surveys %}
+                    <tr>
+                      <td>{{ surv.survey.survey_name }}</td>
+                      <td>{{ surv.startDatetime }}</td>
+                      <td>{{ surv.endDatetime }}</td>
+                      <td><a href="{% url 'que_list' surv.survey_id %}">Start Survey</a></td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="row">
             <div class="col-lg-6 mb-4">
 
               <!-- Illustrations -->
@@ -265,10 +356,7 @@
 
 
 
-
-
-
-                    <div class="card shadow mb-4">
+          <div class="card shadow mb-4">
             <div class="card-header py-3">
               <h6 class="m-0 font-weight-bold text-primary">Resume Following Surveys</h6>
             </div>
