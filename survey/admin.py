@@ -8,31 +8,10 @@ from import_export.admin import ImportExportModelAdmin
 class UserResource(resources.ModelResource):
     class Meta:
         model = Employee
-        fields = ('emp_name', 'emp_username', 'emp_designation', 'emp_address', 'organization')
+        fields = ('id', 'emp_name', 'emp_username', 'emp_password', 'emp_designation', 'emp_address', 'organization')
         export_order = fields
         skip_unchanged = True
         report_skipped = True
-        exclude = ['id']
-        import_id_fields = ['organization_id']
-
-        def before_import(self, dataset, using_transactions, dry_run, **kwargs):
-            organization = kwargs['user'].organization_id
-            if 'organization_id' not in dataset.headers:
-                dataset.headers.append('organization_id')
-                contract_field = [int(organization)] * dataset.height
-                dataset.append_col(contract_field, header='organization_id')
-
-        def get_instance(self, instance_loader, row):
-            try:
-                params = {}
-                for key in instance_loader.resource.get_import_id_fields():
-                    field = instance_loader.resource.fields[key]
-                    params[field.attribute] = field.clean(row)
-                return self.get_queryset().get(**params)
-            except Exception as e:
-                print(e)
-                return None
-
 
 
 class MyUserAdmin(UserAdmin):
