@@ -161,6 +161,7 @@ class SurveyEmployeeDetails(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         obj.organization = request.user.organization
+        obj.flag = False
         obj.save()
 
     def get_queryset(self, request):
@@ -174,7 +175,8 @@ class SurveyEmployeeDetails(admin.ModelAdmin):
 
 class AnswerDetails(admin.ModelAdmin):
 
-    list_display = ('id', 'employee', 'survey', 'question', 'organization', 'response', 'flag', 'created_date', 'updated_date')
+    list_display = ('id', 'employee', 'survey', 'question', 'organization', 'response',
+                    'flag', 'created_date', 'updated_date')
     list_filter = ('employee', 'survey', 'created_date', 'updated_date')
 
     def has_add_permission(self, request, obj=None):

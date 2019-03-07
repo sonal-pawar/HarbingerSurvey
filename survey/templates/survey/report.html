@@ -16,11 +16,14 @@
                                         <th>Assigned Surveys</th>
                                         <th>Survey Start Date</th>
                                         <th>Survey End Date </th>
+                                        <th>Survey Status </th>
+
                                     </tr>
                                 </thead>
 
                                 <tbody>
                                    {% for sur in survey %}
+
                                     <tr>
 
                                         <td>
@@ -34,6 +37,13 @@
                                                  </td>
 
                                         <td>  {{ sur.endDatetime }}
+                                                 </td>
+                                        <td>
+                                            {% if sur.flag == 1 %}
+                                            <h6>completed</h6>
+                                            {% else %}
+                                            <h6>Incomplete</h6>
+                                            {% endif %}
                                                  </td>
                                     </tr>
                                    {% endfor %}

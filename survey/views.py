@@ -122,6 +122,12 @@ def save(request, survey_id):
                             survey_result_obj.flag = True
                             survey_result_obj.save()
 
+                            survey_status = SurveyEmployee.objects.get(employee=Employee.objects.get(id=emp.id),
+                                                                       survey=Survey.objects.get(id=survey_id),
+                                                                       organization=request.user.organization)
+                            survey_status.flag = True
+                            survey_status.save()
+
                         else:
                             survey_result_obj.flag = False
                             survey_result_obj.save()
@@ -219,16 +225,8 @@ def survey_questions(request, survey_id):
 
 
 def report(request):
-    emp_data = Employee.objects.filter(organization_id=request.user.organization)
-    for emp in emp_data:
+    survey_data = SurveyEmployee.objects.filter(organization_id=request.user.organization)
+    context = {'survey': survey_data}
+    return render(request, 'survey/report.html', context)
 
-        result = SurveyFeedback.objects.filter(employee_id=emp.id).values('employee_id').distinct()
-        print(result)
-        for i in result:
-            print(i['employee_id'])
-            survey_emp_data = SurveyEmployee.objects.filter(employee_id=i['employee_id'])
-            context = {'employee': emp_data, 'survey': survey_emp_data, 'result': result}
-            return render(request, 'survey/report.html', context)
-        return render(request, 'survey/NotAvailable.html')
-    return render(request, 'survey/NotAvailable.html')
 

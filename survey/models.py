@@ -97,6 +97,7 @@ class SurveyEmployee(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     startDatetime = models.DateField(blank=True, null=True)
     endDatetime = models.DateField(blank=True, null=True)
+    flag = models.BooleanField()
 
     def __str__(self):
         return self.survey.survey_name + "-" + self.employee.emp_name
