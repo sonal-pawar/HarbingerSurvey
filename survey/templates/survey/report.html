@@ -41,8 +41,10 @@
                                         <td>
                                             {% if sur.flag == 1 %}
                                             <h6>completed</h6>
-                                            {% else %}
+                                            {% elif sur.flag == 0%}
                                             <h6>Incomplete</h6>
+                                            {% else %}
+                                            <h6>Not Started</h6>
                                             {% endif %}
                                                  </td>
                                     </tr>

@@ -4,6 +4,9 @@ from django.core.mail import EmailMessage
 from django.contrib.auth.decorators import login_required
 from django.utils.dateparse import parse_date
 from django.utils.timezone import now
+from django.contrib.auth.admin import UserAdmin
+from import_export.admin import ImportExportModelAdmin
+from django.contrib import admin
 
 
 @login_required(login_url='admin:index')
@@ -118,19 +121,20 @@ def save(request, survey_id):
                         survey_result_obj.question = Question.objects.get(id=name)
                         survey_result_obj.organization = request.user.organization
                         survey_result_obj.response = ', '.join(request.POST.getlist(name))
+                        survey_status = SurveyEmployee.objects.get(employee=Employee.objects.get(id=emp.id),
+                                                                   survey=Survey.objects.get(id=survey_id),
+                                                                   organization=request.user.organization)
                         if request.POST["btn_response"] == "Finish":
                             survey_result_obj.flag = True
                             survey_result_obj.save()
-
-                            survey_status = SurveyEmployee.objects.get(employee=Employee.objects.get(id=emp.id),
-                                                                       survey=Survey.objects.get(id=survey_id),
-                                                                       organization=request.user.organization)
                             survey_status.flag = True
                             survey_status.save()
 
                         else:
                             survey_result_obj.flag = False
                             survey_result_obj.save()
+                            survey_status.flag = False
+                            survey_status.save()
         elif name == 'btn_response' and request.POST["btn_response"] == "Finish":
 
             for record in all_answers:

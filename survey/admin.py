@@ -1,8 +1,10 @@
 from django.contrib import admin
-from .models import Employee, Organization,Survey,Question,SurveyEmployee, SurveyQuestion, SurveyFeedback, User
+from .models import Employee, Organization, Survey, Question, SurveyEmployee, SurveyQuestion, SurveyFeedback, User
 from django.contrib.auth.admin import UserAdmin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
+from django.utils.timezone import now
+import datetime
 
 
 class UserResource(resources.ModelResource):
@@ -12,6 +14,13 @@ class UserResource(resources.ModelResource):
         export_order = fields
         skip_unchanged = True
         report_skipped = True
+
+
+class EmployeeResource(resources.ModelResource):
+    class Meta:
+        model = SurveyEmployee
+        fields = ('id', 'survey', 'employee', 'startDatetime', 'endDatetime', 'flag')
+        export_order = fields
 
 
 class MyUserAdmin(UserAdmin):
@@ -36,9 +45,9 @@ class OrganizationDetails(admin.ModelAdmin):
     list_filter = ('location',)
 
 
-class EmployeeDetails(ImportExportModelAdmin,admin.ModelAdmin):
+class EmployeeDetails(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('id', 'emp_name', 'emp_username', 'emp_designation', 'emp_address', 'organization')
-    # list_filter = ('company',)
+    list_filter = ('emp_username',)
     fieldsets = (
         ('Personal info', {'fields': ('emp_name', 'emp_username', 'emp_password', 'emp_designation', 'emp_address')}),
     )
@@ -101,7 +110,7 @@ class SurveyDetails(admin.ModelAdmin):
     add_fieldsets = UserAdmin.add_fieldsets + (
         ('Survey', {'fields': ('survey_name', 'description', 'date')}),
     )
-    ordering = ('survey_name',)
+    ordering = ('date',)
 
     def save_model(self, request, obj, form, change):
         obj.organization = request.user.organization
@@ -117,7 +126,7 @@ class SurveyDetails(admin.ModelAdmin):
 
 
 class SurveyQuestionDetails(admin.ModelAdmin):
-    list_display = ('id', 'survey')
+    list_display = ('id', 'survey', 'question')
     list_filter = ('question',)
     fieldsets = (
         ('survey', {'fields': ('survey', 'question')}),
@@ -127,6 +136,13 @@ class SurveyQuestionDetails(admin.ModelAdmin):
         ('survey', {'fields': ('survey', 'question')}),
     )
     ordering = ('survey',)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "question":
+            kwargs["queryset"] = Question.objects.filter(organization=request.user.organization)
+        if db_field.name == 'survey':
+            kwargs["queryset"] = Survey.objects.filter(organization=request.user.organization)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def save_model(self, request, obj, form, change):
         obj.organization = request.user.organization
@@ -141,13 +157,15 @@ class SurveyQuestionDetails(admin.ModelAdmin):
         return qs
 
 
-class SurveyEmployeeDetails(admin.ModelAdmin):
-    list_display = ('id', 'survey', 'employee', 'organization')
+class SurveyEmployeeDetails(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('id', 'survey', 'employee', 'startDatetime', 'endDatetime', 'status_list')
     list_filter = ('survey',)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "employee":
             kwargs["queryset"] = Employee.objects.filter(organization=request.user.organization)
+        if db_field.name == 'survey':
+            kwargs["queryset"] = Survey.objects.filter(organization=request.user.organization)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     fieldsets = (
@@ -158,10 +176,21 @@ class SurveyEmployeeDetails(admin.ModelAdmin):
         ('survey', {'fields': ('survey', 'employee', 'startDatetime', 'endDatetime')}),
     )
     ordering = ('survey',)
+    resource_class = EmployeeResource
+
+    def status_list(self, obj):
+        d = datetime.datetime.now()
+        if obj.flag is True:
+            return 'Completed'
+        elif obj.flag is False:
+            return 'Pending'
+        elif obj.flag is None:
+            return "Not started"
+    status_list.short_description = 'Status'
 
     def save_model(self, request, obj, form, change):
         obj.organization = request.user.organization
-        obj.flag = False
+        obj.flag = None
         obj.save()
 
     def get_queryset(self, request):
