@@ -1,18 +1,21 @@
+import logging
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Employee, SurveyQuestion, Survey, SurveyEmployee, Question, SurveyFeedback, User
-from django.core.mail import EmailMessage
 from django.contrib.auth.decorators import login_required
 from django.utils.dateparse import parse_date
 from django.utils.timezone import now
-from django.contrib.auth.admin import UserAdmin
-from import_export.admin import ImportExportModelAdmin
-from django.contrib import admin
+from django.core.mail import EmailMessage
+from smtplib import SMTPAuthenticationError
+from .models import Employee, SurveyQuestion, Survey, SurveyEmployee, Question, SurveyFeedback, User
+
+logger = logging.getLogger(__name__)
 
 
 @login_required(login_url='admin:index')
 def index(request):
     if request.user.is_authenticated:
+        logger.warning(" Admin must be authenticated ")
         user_data = User.objects.filter(organization_id=request.user.organization_id)
+        logger.info("Now {} is logged in ".format(request.user))
         context = {'user_data': user_data}
         return render(request, 'survey/home.html', context)
 
@@ -22,13 +25,13 @@ def question_list(request, survey_id):
     m = request.session['username']
     emp = Employee.objects.get(emp_username=m)
     survey_data = SurveyQuestion.objects.filter(survey=survey_id).values('question')
-    j = 0
+    count = 0
     que_id1 = ()
-    for i in survey_data:
-        print(i)
-        que_id = survey_data[j]['question']
+    for questions in survey_data:
+        print(questions)
+        que_id = survey_data[count]['question']
         que_id1 += (que_id,)
-        j += 1
+        count += 1
 
     question_data = Question.objects.filter(id__in=que_id1)
     ans_data = SurveyFeedback.objects.filter(survey_id=survey_id, employee_id=emp.id)
@@ -149,7 +152,7 @@ def save(request, survey_id):
                 )
                 # email.send()
                 print("Email has been send to ", m)
-            except Exception as e:
+            except SMTPAuthenticationError as e:
                 print("Email Error : ", e)
 
     return redirect("employee")
@@ -193,7 +196,7 @@ def save_assign_survey(request):
                     )
                     # email.send()
                     print("Email has been send to ", to_email)
-                except Exception as e:
+                except SMTPAuthenticationError as e:
                     print("Email Error : ", e)
                 finally:
                     return redirect('surveyList')

@@ -1,17 +1,15 @@
+from django.apps.registry import apps
+from django.conf import settings
+from django.core.management import call_command
+from django.core.management.base import BaseCommand
+from django.utils.encoding import smart_bytes
 from datetime import datetime
 from io import BytesIO
 from json import dump
 from os import path
 from tarfile import TarInfo, TarFile
-
-from django.apps.registry import apps
-from django.conf import settings
-from django.core.management import call_command
-from django.core.management.base import BaseCommand
-from django.db import models
-from django.utils.encoding import smart_bytes
-
 from ... import __version__
+from django.db import models
 
 
 class MixedIO(BytesIO):

@@ -4,6 +4,6 @@ $(document).ready(function() {
         "pageLength": 5,
         "bLengthChange": false,
         "searching": false,
-        "ordering": false
+        "ordering": true
     });
 });

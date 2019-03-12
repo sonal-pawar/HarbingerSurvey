@@ -1,10 +1,8 @@
 from django.contrib import admin
-from .models import Employee, Organization, Survey, Question, SurveyEmployee, SurveyQuestion, SurveyFeedback, User
 from django.contrib.auth.admin import UserAdmin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
-from django.utils.timezone import now
-import datetime
+from .models import Employee, Organization, Survey, Question, SurveyEmployee, SurveyQuestion, SurveyFeedback, User
 
 
 class UserResource(resources.ModelResource):
@@ -179,7 +177,6 @@ class SurveyEmployeeDetails(ImportExportModelAdmin, admin.ModelAdmin):
     resource_class = EmployeeResource
 
     def status_list(self, obj):
-        d = datetime.datetime.now()
         if obj.flag is True:
             return 'Completed'
         elif obj.flag is False:
