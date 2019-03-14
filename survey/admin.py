@@ -1,8 +1,13 @@
+import logging
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 from .models import Employee, Organization, Survey, Question, SurveyEmployee, SurveyQuestion, SurveyFeedback, User
+
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 
 
 class UserResource(resources.ModelResource):

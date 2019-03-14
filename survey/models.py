@@ -1,6 +1,9 @@
+import logging
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+
+logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 
 
 class Organization(models.Model):
@@ -79,7 +82,10 @@ class Question(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
 
     def get_choice(self):
+        if self.choices is not None:
             return self.choices.split(',')
+        else:
+            pass
 
     def save(self, *args, **kwargs):
         if (self.question_type == Question.RADIO or self.question_type == Question.SELECT
