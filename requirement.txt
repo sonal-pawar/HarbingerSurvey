@@ -34,7 +34,6 @@ pytest-cov==2.6.1
 pytest-django==3.4.8
 python-dateutil==2.8.0
 pytz==2018.9
-PyYAML==3.13
 requests==2.21.0
 selenium==3.141.0
 six==1.12.0
