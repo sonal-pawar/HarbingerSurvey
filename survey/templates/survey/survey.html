@@ -57,7 +57,7 @@
 
       <!-- Nav Item - Charts -->
       <li class="nav-item">
-        <a class="nav-link" href="{% url 'index' %}">
+        <a class="nav-link" href="{% url 'employee' %}">
           <i class="fas fa-fw fa-chart-area"></i>
           <span>Home</span></a>
       </li>
@@ -108,7 +108,7 @@
                   {{ edetail.emp_username }}
                 </a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="{% url 'logout' %}" data-toggle="modal" data-target="#logoutModal">
+                <a class="dropdown-item" href="{% url 'login_gateway' %}" data-toggle="modal" data-target="#logoutModal">
                   <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                   Logout
                 </a>

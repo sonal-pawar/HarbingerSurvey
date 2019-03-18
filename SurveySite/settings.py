@@ -111,27 +111,37 @@ AUTH_PASSWORD_VALIDATORS = [
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'formatters': {
-        'standard': {
-            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-            'datefmt': "%d/%b/%Y %H:%M:%S",
-        },
-    },
     'handlers': {
-        'logfile': {
+        'file_logging': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR + '\survey\logs\debug.log',
-            'formatter': 'standard',
+            'backupCount': 5,
+            'maxBytes': 5000000,
+            'filename': 'django.log'
         },
-        'console': {
-            'class': 'logging.StreamHandler',
+        'db_logging': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'backupCount': 5,
+            'maxBytes': 5000000,
+            'filename': 'django-db.log'
         },
     },
+
     'loggers': {
         'django': {
-            'handlers': ['logfile', 'console'],
+            'handlers': ['file_logging'],
             'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django.db': {
+            'handlers': ['db_logging'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django.template': {
+            'handlers': ['file_logging'],
+            'level': 'INFO',
             'propagate': True,
         },
     }

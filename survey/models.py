@@ -1,3 +1,6 @@
+"""
+This is the database structure of survey application
+"""
 import logging
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser
@@ -7,6 +10,9 @@ logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 
 
 class Organization(models.Model):
+    """
+    This the organization class
+    """
     company_name = models.CharField(max_length=200)
     location = models.CharField(max_length=100)
     description = models.CharField(max_length=200)
@@ -16,16 +22,23 @@ class Organization(models.Model):
 
 
 class User(AbstractUser):
+    """
+    This is user class which overrides Abstract User
+    """
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, blank=True, null=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)
 
 
 class Employee(models.Model):
+    """
+    This is Employee class
+    """
     emp_name = models.CharField(max_length=200)
     emp_username = models.CharField(max_length=100, unique=True,
-                                    error_messages={'required': 'Please provide your email address.',
-                                                    'unique': 'An account with this email exist.'},)
+                                    error_messages=
+                                    {'required': 'Please provide your email address.',
+                                     'unique': 'An account with this email exist.'},)
     emp_password = models.CharField(max_length=100)
     emp_designation = models.CharField(max_length=100)
     emp_address = models.CharField(max_length=200)
@@ -35,10 +48,16 @@ class Employee(models.Model):
         return self.emp_name
 
     class Meta:
+        """
+        this shows class in plural form
+        """
         verbose_name_plural = 'Employees'
 
 
 class Survey(models.Model):
+    """
+    This is Survey class
+    """
     survey_name = models.CharField(max_length=200)
     description = models.CharField(max_length=200)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
@@ -48,18 +67,28 @@ class Survey(models.Model):
         return self.survey_name
 
     class Meta:
+        """
+              this shows class in plural form
+        """
         verbose_name_plural = 'surveys'
 
 
 def validate_list(value):
-    """takes a text value and verifies that there is at least one comma  """
+    """takes a text value and verifies
+     that there is at least one comma"""
     values = value.split(',')
     if len(values) < 2:
         raise ValidationError(
-            "The selected field requires an associated list of choices. Choices must contain more than one item.")
+            "The selected field requires an "
+            "associated list of choices. "
+            "Choices must contain more"
+            " than one item.")
 
 
 class Question(models.Model):
+    """
+    This is question class
+    """
     TEXT = 'text'
     RADIO = ' radio '
     SELECT = 'select'
@@ -81,23 +110,19 @@ class Question(models.Model):
                                          ' provide a comma-separated list of options for this question .')
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
 
+    # noinspection PyUnresolvedReferences
     def get_choice(self):
         if self.choices is not None:
             return self.choices.split(',')
-        else:
-            pass
-
-    def save(self, *args, **kwargs):
-        if (self.question_type == Question.RADIO or self.question_type == Question.SELECT
-                or self.question_type == Question.SELECT_MULTIPLE):
-            validate_list(self.choices)
-        super(Question, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.question
 
 
 class SurveyEmployee(models.Model):
+    """
+    Survey Employee Model
+    """
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
@@ -110,6 +135,9 @@ class SurveyEmployee(models.Model):
 
 
 class SurveyQuestion(models.Model):
+    """
+    Survey Question model
+    """
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
@@ -119,6 +147,9 @@ class SurveyQuestion(models.Model):
 
 
 class SurveyFeedback(models.Model):
+    """
+    Survey Feedback model
+    """
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)

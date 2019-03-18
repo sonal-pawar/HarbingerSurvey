@@ -1,7 +1,45 @@
 import unittest
-from django.test import TestCase
+from django.core import mail
+from django.test import TestCase, modify_settings
 from selenium import webdriver
 from survey.models import Organization, Employee, Survey, User, Question
+
+
+@modify_settings(MIDDLEWARE_CLASSES={
+    'append': 'django.middleware.cache.FetchFromCacheMiddleware',
+    'prepend': 'django.middleware.cache.UpdateCacheMiddleware',
+})
+class MiddlewareTestCase(TestCase):
+
+    @modify_settings(MIDDLEWARE_CLASSES={
+        'append': 'django.middleware.cache.FetchFromCacheMiddleware',
+        'prepend': 'django.middleware.cache.UpdateCacheMiddleware',
+    })
+    def test_cache_middleware(self):
+        with self.modify_settings(MIDDLEWARE_CLASSES={
+            'append': 'django.middleware.cache.FetchFromCacheMiddleware',
+            'prepend': 'django.middleware.cache.UpdateCacheMiddleware',
+            'remove': [
+                'django.contrib.sessions.middleware.SessionMiddleware',
+                'django.contrib.auth.middleware.AuthenticationMiddleware',
+                'django.contrib.messages.middleware.MessageMiddleware',
+            ],
+        }):
+            response = self.client.get('/')
+
+
+class EmailTest(TestCase):
+    def test_send_email(self):
+        # Send message.
+        mail.send_mail('Subject here', 'Here is the message.',
+                       'from@example.com', ['to@example.com'],
+                       fail_silently=False)
+
+        # Test that one message has been sent.
+        self.assertEqual(len(mail.outbox), 1)
+
+        # Verify that the subject of the first message is correct.
+        self.assertEqual(mail.outbox[0].subject, 'Subject here')
 
 # models test
 
@@ -45,6 +83,7 @@ class ModelsTest(TestCase):
         emp = self.create_employee()
         self.assertTrue(isinstance(emp, Employee))
         self.assertEqual(emp.__str__(), emp.emp_name)
+        self.assertEqual(str(Employee._meta.verbose_name_plural), "Employees")
 
         user = self.create_user()
         self.assertTrue(isinstance(user, User))
@@ -52,6 +91,7 @@ class ModelsTest(TestCase):
         survey = self.create_survey()
         self.assertEqual(survey.__str__(), survey.survey_name)
         self.assertTrue(isinstance(survey, Survey))
+        self.assertEqual(str(Survey._meta.verbose_name_plural), "surveys")
 
         question = self.create_question()
         self.assertTrue(isinstance(question, Question))
@@ -85,7 +125,7 @@ class TestLogin(unittest.TestCase):
         self.assertIn('http://127.0.0.1:8000/report/', self.driver.current_url)
 
     def tearDown(self):
-        self.driver.quit
+        self.driver.quit()
 
 
 if __name__ == '__main__':

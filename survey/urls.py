@@ -3,7 +3,8 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', views.login_gateway, name='login_gateway'),
+    path('admin_home/', views.index, name='admin_home'),
     path('employee/', views.employee, name='employee'),
     path('login/', views.login, name='login'),
     path('que_list/<int:survey_id>', views.question_list, name='que_list'),

@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+"""
+this file manages project level functionality
+"""
 import os
 import sys
 if __name__ == '__main__':
